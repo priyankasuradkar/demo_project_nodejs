@@ -1,0 +1,4 @@
+// first set up the server//
+// give routes//
+// database //
+// start apis//
