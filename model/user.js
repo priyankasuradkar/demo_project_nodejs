@@ -23,9 +23,34 @@ const userSchema = new mongoose.Schema({
     },
     verificationCode: {
         type: Number,
-    }
-
-
+    },
+    createdAt: {
+        type: String,
+        default: Date.now
+    },
+    accountStatus: {
+        type: String,
+        default: "PENDING"
+    },
+    sessionToken: { //for the vrification of token
+        type: String,
+    },
+    leaf: {
+        totalLeaf: {
+            type: Number,
+            default: 0
+        },
+        lastMineLeaf: {
+            type: Number
+        }
+    },
+    leafMiningTime: {
+        type: String
+    },
+    notifications: [],
+    circle: [],
+    savedArticles: [],
+    likedArticles: []
 })
 const user = new mongoose.model("user", userSchema)
 module.exports = user;

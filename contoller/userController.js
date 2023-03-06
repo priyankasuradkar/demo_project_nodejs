@@ -111,8 +111,133 @@ const loginUser = async (req, res) => {
 }
 
 
-//
+///otpVerification
+const otpVerification = async (req, res) => {
+    try {
+        const { otp, email } = req.body
+        const isUserExistsOrNot = await user.findOne({ email: email }).lean()
+
+        if (!isUserExistsOrNot)
+            return res.status(403).json({ err: "User not found!!" })
+        console.log(otp, isUserExistsOrNot.verificationCode)
+
+        if (otp === isUserExistsOrNot.verificationCode) {
+            await user.updateOne({ email: email }, {
+                $set: {
+                    accountStatus: "ACTIVE"
+                }
+            })
+            return res.status().json({ success: "account is activated!!" })
+        }
+    }
+    catch (err) {
+        return res.status(403).json({ err: "Internal server error!!!" })
+        //console.log("error  : : :", err)
+    }
+}
+
+//resend otp
+const resendOTP = async (req, res) => {
+    try {
+        const { email, phoneNumber } = req.body
+        //mobileverification middleware//
+
+        return res.status(200).json({ success: "OTP Resent on your number!" })
+    }
+    catch {
+        return res.status(403).json({ err: "Internal server error!!" })
+    }
+}
+
+//forget password//
+const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body
+        const isUserExistsOrNot = await user.findOne({ email: email }).lean()
+        if (isUserExistsOrNot)
+            return res.status(403).json({ err: "user not found!!" })
+
+        //send otp password middleware
+        return res.status(200).json({ success: "Please check your mail to reset password" })
+    }
+    catch {
+        return res.status(403).json({ err: "Internal server error!" })
+    }
+}
+
+//reset Password//
+const resetPassword = async (req, res) => {
+    try {
+        const { password, email } = req.body
+        const isUserExistsOrNot = await user.findOne({ email: email }).lean()
+
+        if (!isUserExistsOrNot) {
+            return res.status(403).json({ error: "User does not exsits!!" })
+        }
+
+        const isPasswordMatched = await bcrypt.compare(
+            password,
+            isUserExistsOrNot.password
+        )
+
+        if (isPasswordMatched)
+            return res.status(403).json({ error: "New password cannot match to old password!!" })
+
+        const encryptPassword = await bcrypt.hash(password, 12)
+        await user.updateOne({ "email": email }, {
+            $set: {
+                password: encryptPassword
+            }
+        })
+
+        return res.status(200).json({ success: "password reset successfully!!" })
+    }
+    catch {
+        return res.status(500).json({ error: err })
+    }
+
+    //updatedProfileDetails 
+    const updatedProfileDetails = async (req, res) => {
+        try {
+            const { fullName, phoneNumber } = req.body
+            const email = req.user.email
+
+            if (fullName)
+                await user.updateOne({ "email": email }, {
+                    $set: {
+                        fullName: fullName
+                    }
+                })
+
+            if (phoneNumber)
+                await user.updateOne({ phoneNumber: phoneNumber }, {
+                    $set: {
+                        phoneNumber: phoneNumber
+                    }
+                })
+            return res.status(200).json({ success: "Updated profile!!" })
+        }
+        catch (err) {
+            return res.status(403).json({ err: err })
+        }
+    }
+
+    //mineleaf
+    //     const mineLeaf = async (req, res) => {
+    //         try {
+    //             const email = req.user.email
+    //             const { le }
+    //         }
+    //         catch {
+
+    //         }
+    //     }
+}
 module.exports = {
     signUp,
-    login
+    login,
+    otpVerification,
+    resendOTP,
+    forgotPassword,
+    resetPassword
 }

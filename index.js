@@ -6,6 +6,7 @@ require('./repo/mongoDBConfig')
 
 app.use(express.json())
 app.use(userRoutes)
+
 app.listen(PORT, () => {
     console.log('Server is Running on port 8000');
 })
